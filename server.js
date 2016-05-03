@@ -1,12 +1,14 @@
 'use strict';
 
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 const config = require('./webpack.config');
-const express = require('express');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
-const app = express();
 const port = process.env.PORT || 3000;
 
 const compiler = webpack(config);
@@ -17,7 +19,14 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(port, function(err) {
+io.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
+});
+
+server.listen(port, function(err) {
   if (err) {
     console.error(err);
   } else {
